@@ -76,7 +76,7 @@ namespace WpfApp2
                         Height = cellSize - 1,
                         Stroke = Brushes.Gray,
                         StrokeThickness = 0.5,
-                        Fill = Brushes.White
+                        Fill = field[r, c] ? Brushes.Blue : Brushes.White
                     };
 
                     Canvas.SetLeft(rect, c * cellSize);
@@ -125,12 +125,7 @@ namespace WpfApp2
 
         private void MoveDown()
         {
-            if (CanMove(figureX, figureY + 1, currentFigure))
-            {
-                figureY++;
-            }
-
-            else
+            if (!CanMove(figureX, figureY + 1, currentFigure))
             {
                 foreach (var p in currentFigure)
                 {
@@ -143,8 +138,14 @@ namespace WpfApp2
                     }
 
                 }
+
                 ClearFullLines();
                 SpawnNewFigure();
+            }
+
+            else
+            {
+                figureY++;
             }                
             Draw();
         }

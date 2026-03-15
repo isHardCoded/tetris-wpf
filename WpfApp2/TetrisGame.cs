@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Media;
 
 namespace WpfApp2
 {
@@ -24,7 +24,7 @@ namespace WpfApp2
             new Point[] { new Point(1,0), new Point(0,1), new Point(1,1), new Point(2,1) }, // T
         };
 
-        private static readonly Brush[] FigureBrushes =
+        private static readonly IBrush[] FigureBrushes =
         {
             Brushes.Yellow,
             Brushes.Cyan,
@@ -35,14 +35,21 @@ namespace WpfApp2
             Brushes.MediumPurple,
         };
 
-        // null = пусто, Brush = занято (цвет зафиксированной фигуры)
-        public Brush[,] Field { get; } = new Brush[Rows, Cols];
+        // null = пусто, IBrush = занято (цвет зафиксированной фигуры)
+        public IBrush[,] Field { get; } = new IBrush[Rows, Cols];
         public List<Point> CurrentFigure { get; private set; } = new List<Point>();
-        public Brush FigureBrush { get; private set; } = Brushes.Red;
+        public IBrush FigureBrush { get; private set; } = Brushes.Red;
         public int FigureX { get; private set; }
         public int FigureY { get; private set; }
         public int Score { get; private set; }
         public bool IsGameOver { get; private set; }
+
+        public List<Point> HeldFigure { get; private set; }
+        public IBrush HeldBrush { get; private set; }
+        public bool CanHold { get; private set; } = true;
+
+        private int _currentIndex = -1;
+        private int _heldIndex = -1;
 
         public event Action GameOver;
         public event Action ScoreChanged;
@@ -54,12 +61,21 @@ namespace WpfApp2
                     Field[r, c] = null;
             Score = 0;
             IsGameOver = false;
+            HeldFigure = null;
+            HeldBrush = null;
+            _heldIndex = -1;
             SpawnNewFigure();
         }
 
         public void SpawnNewFigure()
         {
-            int index = Rnd.Next(FigureShapes.Length);
+            SpawnFigureByIndex(Rnd.Next(FigureShapes.Length));
+            CanHold = true;
+        }
+
+        private void SpawnFigureByIndex(int index)
+        {
+            _currentIndex = index;
             CurrentFigure = new List<Point>(FigureShapes[index]);
             FigureX = 3;
             FigureY = 0;
@@ -70,6 +86,31 @@ namespace WpfApp2
                 IsGameOver = true;
                 GameOver?.Invoke();
             }
+        }
+
+        public void Hold()
+        {
+            if (!CanHold || IsGameOver) return;
+
+            int savedIndex = _currentIndex;
+
+            if (_heldIndex < 0)
+            {
+                _heldIndex = savedIndex;
+                HeldFigure = new List<Point>(FigureShapes[_heldIndex]);
+                HeldBrush = FigureBrushes[_heldIndex];
+                SpawnNewFigure();
+            }
+            else
+            {
+                int tempHeld = _heldIndex;
+                _heldIndex = savedIndex;
+                HeldFigure = new List<Point>(FigureShapes[_heldIndex]);
+                HeldBrush = FigureBrushes[_heldIndex];
+                SpawnFigureByIndex(tempHeld);
+            }
+
+            CanHold = false;
         }
 
         public bool CanMove(int x, int y, List<Point> figure)
@@ -128,12 +169,10 @@ namespace WpfApp2
         {
             if (IsGameOver) return;
 
-            // Поворот 90° по часовой: (x, y) → (y, -x)
             var rotated = new List<Point>();
             foreach (var p in CurrentFigure)
                 rotated.Add(new Point(p.Y, -p.X));
 
-            // Нормализация: сдвигаем чтобы minX=0, minY=0
             double minX = double.MaxValue, minY = double.MaxValue;
             foreach (var p in rotated)
             {
@@ -166,9 +205,8 @@ namespace WpfApp2
             {
                 bool full = true;
                 for (int c = 0; c < Cols; c++)
-                {
                     if (Field[r, c] == null) { full = false; break; }
-                }
+
                 if (!full) continue;
 
                 for (int row = r; row > 0; row--)
@@ -182,10 +220,10 @@ namespace WpfApp2
 
             if (cleared <= 0) return;
 
-            if (cleared == 1) Score += 100;
+            if      (cleared == 1) Score += 100;
             else if (cleared == 2) Score += 300;
             else if (cleared == 3) Score += 500;
-            else Score += 800;
+            else                   Score += 800;
 
             ScoreChanged?.Invoke();
         }

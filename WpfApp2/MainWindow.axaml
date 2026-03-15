@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:WpfApp2"
+        x:Class="WpfApp2.MainWindow"
+        Title="Tetris"
+        CanResize="False"
+        SizeToContent="WidthAndHeight"
+        KeyDown="Window_KeyDown"
+        KeyUp="Window_KeyUp"
+        Background="#1a1a2e">
+    <StackPanel Orientation="Horizontal" Margin="10">
+
+        <!-- Игровое поле + оверлей Game Over -->
+        <Grid>
+            <local:GameView Name="GameView" Width="240" Height="480"/>
+            <Border Name="GameOverOverlay" IsVisible="False" Background="#BB000000">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="GAME OVER" Foreground="White" FontSize="26" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Name="FinalScoreText" Foreground="#aaaaaa" FontSize="14"
+                               HorizontalAlignment="Center" Margin="0,8,0,16"/>
+                    <TextBlock Text="R — начать заново" Foreground="#888888" FontSize="12"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Боковая панель -->
+        <StackPanel Width="110" Margin="12,0,0,0">
+            <TextBlock Text="TETRIS" Foreground="White" FontSize="22" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,10,0,16"/>
+
+            <TextBlock Text="HOLD" Foreground="#aaaaaa" FontSize="11"
+                       HorizontalAlignment="Center" Margin="0,0,0,6"/>
+            <Border BorderBrush="#333355" BorderThickness="1"
+                    Width="96" Height="60" HorizontalAlignment="Center" Margin="0,0,0,16">
+                <Canvas Name="HoldCanvas" Width="96" Height="60" Background="#111111"/>
+            </Border>
+
+            <TextBlock Text="SCORE" Foreground="#aaaaaa" FontSize="11"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Name="ScoreText" Text="0" Foreground="White" FontSize="28" FontWeight="Bold"
+                       HorizontalAlignment="Center" Margin="0,4,0,0"/>
+
+            <Rectangle Height="1" Fill="#333355" Margin="0,16,0,12"/>
+
+            <TextBlock Text="Controls" Foreground="#aaaaaa" FontSize="11"
+                       HorizontalAlignment="Center" Margin="0,0,0,8"/>
+            <TextBlock Text="← →   Move"       Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+            <TextBlock Text="↑       Rotate"    Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+            <TextBlock Text="↓       Soft drop" Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+            <TextBlock Text="Space  Hard drop"  Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+            <TextBlock Text="C       Hold"      Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+            <TextBlock Text="R       Restart"   Foreground="#cccccc" FontSize="11" Margin="4,2"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>
